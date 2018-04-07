@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+	<constant name="struts.objectFactory" value="spring"></constant>
+
+	<!-- Struts2在2.5版本后添加strict-method-invocation(严格方法访问)，默认为true，不能使用动态方法调用功能，故需设为false -->
+	<!-- <package name="product" extends="struts-default" namespace="/" strict-method-invocation="false"> 
+		保存商品 <action name="product_*" class="productAction" method="{1}Product"> 
+		<result>WEB-INF/view/index.jsp</result> <result name="input">WEB-INF/view/index.jsp</result> 
+		</action> </package> -->
+
+	<package name="crm" namespace="/" extends="json-default">
+		<interceptors>
+			<interceptor name="powerIntercepter" class="powerIntercepter"></interceptor>
+			<interceptor-stack name="security">
+				<interceptor-ref name="powerIntercepter"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="security"></default-interceptor-ref>
+
+
+		<global-results>
+			<result name="error">/error.jsp</result>
+			<result name="login">/login.jsp</result>
+			<result name="logout" type="redirect">/login.jsp</result>
+			<result name="main" type="redirect">/main/main.jsp</result>
+			<result name="nopower">/common/nopower.jsp</result>
+		</global-results>
+	</package>
+
+	<package name="default" namespace="/power" extends="crm">
+		<action name="loginAction" class="loginAction" method="login"></action>
+		<action name="roleAction" class="roleAction" method="findAllOfLoginToJson">
+			<result name="findAllOfLoginToJson" type="json">
+				<param name="root">roles</param>
+			</result>
+			<result name="findAll">/power/role/queryList.jsp</result>
+			<result name="findAllOfDistribute">/power/users/distributeRole.jsp</result>
+			<result name="distributeMenu" type="redirectAction">roleAction</result>
+		</action>
+
+		<action name="usersAction" class="usersAction" method="findAll">
+			<result name="findAll">/power/users/queryList.jsp</result>
+			<result name="distributeRole" type="redirectAction">usersAction</result>
+			<result name="findAllRoleInUserToJson" type="json">
+				<param name="root">roles</param>
+			</result>
+		</action>
+
+		<action name="menuAction" class="menuAction" method="findAllInRoleToJson">
+			<result name="findAllOfDistribute">/power/role/distributeMenu.jsp</result>
+			<result name="findAllOfDistributeToJson" type="json">
+				<param name="root">menuVos</param>
+			</result>
+			<!-- 登录成功后的左侧菜单 -->
+			<result name="findAllInRoleToJson" type="json">
+				<param name="root">menuVos</param>
+			</result>
+		</action>
+		<action name="moduleAction" class="moduleAction">
+			<result name="findAllOfDistribute">/power/role/distributeModule.jsp</result>
+		</action>
+
+	</package>
+
+
+</struts>
